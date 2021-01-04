@@ -239,11 +239,11 @@ void chip8::execute_cycle() {
 		case 0xC000:
 			V[(opcode & 0x0F00) >> 8] =
 			    (rand() % 256) & (opcode & 0x00FF);
-		case 0xD000:
-			std::uint8_t x = V[(opcode & 0x0F00) >> 8];
-			std::uint8_t y = V[(opcode & 0x00F0) >> 4];
-			std::uint8_t height = opcode & 0x000F;
-			std::uint8_t pixel;
+		case 0xD000: {
+			unsigned short x = V[(opcode & 0x0F00) >> 8];
+			unsigned short y = V[(opcode & 0x00F0) >> 4];
+			unsigned short height = opcode & 0x000F;
+			unsigned short pixel;
 
 			V[0xF] = 0;
 			for (int yline = 0; yline < height; yline++) {
@@ -263,6 +263,36 @@ void chip8::execute_cycle() {
 
 			drawFlag = true;
 			pc += 2;
+		} break;
+
+		case 0xE000:
+			switch (opcode & 0x00FF) {
+				case 0x009E:
+					if (keypad[V[(opcode & 0x0F00) >> 8]] !=
+					    0) {
+						pc += 4;
+					} else {
+						pc += 2;
+					}
+					break;
+				case 0x00A1:
+					if (keypad[V[(opcode & 0x0F00) >> 8]] ==
+					    0) {
+						pc += 4;
+					} else {
+						pc += 2;
+					}
+					break;
+				default: 
+					std::cout << "[ERROR]: Unknown opcode. Segment: 0xE000\n"; 
+			}
 			break;
+		case 0xF000:
+			switch(opcode & 0x00FF) {
+				case 0x0007:
+					V[(opcode & 0x0F00) >> 8] = delay_timer;
+					pc +=2;
+					break;
+			}
 	}
 }

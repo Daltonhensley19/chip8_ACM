@@ -1,8 +1,8 @@
 #include "chip8.h"
 
+#include <cmath>
 #include <iostream>
 #include <random>
-
 /* Key:
 nnn or addr - A 12-bit value, the lowest 12 bits of the instruction
 n or nibble - A 4-bit value, the lowest 4 bits of the instruction
@@ -283,16 +283,77 @@ void chip8::execute_cycle() {
 						pc += 2;
 					}
 					break;
-				default: 
-					std::cout << "[ERROR]: Unknown opcode. Segment: 0xE000\n"; 
+				default:
+					std::cout << "[ERROR]: Unknown opcode. "
+						     "Segment: 0xE000\n";
 			}
 			break;
 		case 0xF000:
-			switch(opcode & 0x00FF) {
+			switch (opcode & 0x00FF) {
 				case 0x0007:
 					V[(opcode & 0x0F00) >> 8] = delay_timer;
+					pc += 2;
+					break;
+				case 0x000A: {
+					bool key_pushed = false;
+
+					for (int i = 0; i < 16; ++i) {
+						if (keypad[i] != 0) {
+							V[(opcode & 0x0F00) >>
+							  8] = i;
+							key_pushed = true;
+						}
+					}
+
+					if (!key_pushed) {
+						return;
+					}
+					pc += 2;
+				} break;
+				case 0x0015:
+					delay_timer = V[(opcode & 0x0F00) >> 8];
+					pc += 2;
+					break;
+				case 0x0018:
+					sound_timer = V[(opcode & 0x0F00) >> 8];
+					pc += 2;
+					break;
+				case 0x001E:
+					if (I + V[(opcode & 0x0F00) >> 8] >
+					    0xFFF) {
+						V[0xF] = 1;
+					} else {
+						V[0xF] = 0;
+					}
+					I += V[(opcode & 0x0F00) >> 8];
+					pc += 2;
+					break;
+				case 0x0029:
+					I = V[(opcode & 0x0F00) >> 8] *
+					    0x5;  // 4x5 Sprite
+					pc += 2;
+					break;
+				case 0x0033:
+					memory[I] = std::floor(
+					    (V[(opcode & 0x0F00) >> 8] / 100) %
+					    10);
+					memory[I + 1] = std::floor(
+					    (V[(opcode & 0x0F00) >> 8] / 10) %
+					    10);
+					memory[I + 2] = std::floor(
+					    V[(opcode & 0x0F00) >> 8] % 10);
+					pc += 2;
+					break;
+				case 0x0055:
+					for (int i = 0; i < V[(opcode & 0x0F00) >> 8] + 1; ++i) {
+						memory[I + i] = V[i];
+					}
+					I += ((opcode & 0x0F00) >> 8) + 1;
 					pc +=2;
 					break;
+					
+					
+					
 			}
 	}
 }

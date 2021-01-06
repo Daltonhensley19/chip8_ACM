@@ -345,15 +345,31 @@ void chip8::execute_cycle() {
 					pc += 2;
 					break;
 				case 0x0055:
-					for (int i = 0; i < V[(opcode & 0x0F00) >> 8] + 1; ++i) {
+					for (int i = 0;
+					     i < V[(opcode & 0x0F00) >> 8] + 1;
+					     ++i) {
 						memory[I + i] = V[i];
 					}
 					I += ((opcode & 0x0F00) >> 8) + 1;
-					pc +=2;
+					pc += 2;
 					break;
-					
-					
-					
+				case 0x0065:
+					for (int i = 0;
+					     i < V[(opcode & 0x0F00) >> 8] + 1;
+					     ++i) {
+						V[i] = memory[I + i];
+					}
+					I += ((opcode & 0x0F00) >> 8) + 1;
+					pc += 2;
+					break;
+				default:
+					std::cout
+					    << "[ERROR]: Invalid instruction. "
+					       "Segment: F000\n";
 			}
+			break;
+		default:
+			std::cout << "[ERROR]: Invalid instruction. Invalid "
+				     "segment.\n";
 	}
 }

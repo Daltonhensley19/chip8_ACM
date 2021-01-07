@@ -25,5 +25,5 @@ struct chip8 {
 
 	void init();
 	void execute_cycle();
-	bool load_rom();
+	void load_rom(const char* rom_path);
 };

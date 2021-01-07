@@ -1,8 +1,10 @@
 #include "chip8.h"
 
 #include <cmath>
+#include <fstream>
 #include <iostream>
 #include <random>
+#include <time.h>
 /* Key:
 nnn or addr - A 12-bit value, the lowest 12 bits of the instruction
 n or nibble - A 4-bit value, the lowest 4 bits of the instruction
@@ -60,6 +62,9 @@ void chip8::init() {
 
 	delay_timer = 0;
 	sound_timer = 0;
+
+	// Generate a random seed based on current time
+	srand(time(NULL));
 }
 
 void chip8::execute_cycle() {
@@ -348,5 +353,38 @@ void chip8::execute_cycle() {
 	default:
 		std::cout << "[ERROR]: Invalid instruction. Invalid "
 			     "segment.\n";
+	}
+
+	// TODO: Rework Sound implementation.
+	if (sound_timer > 0) {
+		--sound_timer;
+	}
+	// Chip-8 requires the delay timer to decrement at a rate of 60Hz
+	if (delay_timer > 0) {
+		--delay_timer;
+	}
+}
+
+void chip8::load_rom(const char *rom_path) {
+	// Initialize the Chip-8
+	init();
+
+	std::cout << "Loading selected rom: " << rom_path << "\n";
+
+	std::ifstream file(rom_path, std::ios::binary | std::ios::ate);
+	// If file opens, create a buffer
+	if(file.is_open()) {
+		std::streampos rom_size = file.tellg();
+		char* rom_buffer = new char[rom_size];
+
+		file.seekg(0, std::ios::beg);
+		file.read(rom_buffer, rom_size);
+		file.close();
+		
+		for (int i = 0; i < rom_size; ++i) {
+			memory[0x200 + i] = rom_buffer[i];
+		}
+		// Clear the buffer to prevent memory leak
+		delete[] rom_buffer;
 	}
 }

@@ -94,8 +94,8 @@ void Chip8::execute_cycle() {
 				     "Draw-screen error."
 				  << "\n";
 			exit(3);
-
-		} break;
+		}
+		break;
 	// Jump to location nnn
 	case 0x1000:
 		pc = opcode & 0x0FFF;
@@ -323,24 +323,20 @@ void Chip8::execute_cycle() {
 			pc += 2;
 			break;
 		case 0x0033:
-			memory[I] =
-				(std::uint8_t)(V[(opcode & 0x0F00) >> 8] / 100);
-			memory[I + 1] =
-			   (std::uint8_t)(V[(opcode & 0x0F00) >> 8] / 10) % 10;
-			memory[I + 2] =
-			   (std::uint8_t) (V[(opcode & 0x0F00) >> 8] % 10);
+			memory[I] = V[(opcode & 0x0F00) >> 8] / 100;
+			memory[I + 1] = (V[(opcode & 0x0F00) >> 8] / 10) % 10;
+			memory[I + 2] = V[(opcode & 0x0F00) >> 8] % 10;
 			pc += 2;
 			break;
 		case 0x0055:
-			for (int i = 0; i < ((opcode & 0x0F00) >> 8);
-			     ++i) {
+			for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
 				memory[I + i] = V[i];
 			}
 			I += ((opcode & 0x0F00) >> 8) + 1;
 			pc += 2;
 			break;
 		case 0x0065:
-			for (int i = 0; i < V[(opcode & 0x0F00) >> 8] + 1;
+			for (int i = 0; i <= ((opcode & 0x0F00) >> 8);
 			     ++i) {
 				V[i] = memory[I + i];
 			}

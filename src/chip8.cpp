@@ -93,9 +93,9 @@ void Chip8::execute_cycle() {
 				     "Segment 0000. "
 				     "Draw-screen error."
 				  << "\n";
+			exit(3);
 
-			break;
-		}
+		} break;
 	// Jump to location nnn
 	case 0x1000:
 		pc = opcode & 0x0FFF;
@@ -232,6 +232,8 @@ void Chip8::execute_cycle() {
 		break;
 	case 0xC000:
 		V[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x00FF);
+		pc += 2;
+		break;
 	case 0xD000: {
 		unsigned short x = V[(opcode & 0x0F00) >> 8];
 		unsigned short y = V[(opcode & 0x00F0) >> 4];
@@ -322,15 +324,15 @@ void Chip8::execute_cycle() {
 			break;
 		case 0x0033:
 			memory[I] =
-			    std::floor((V[(opcode & 0x0F00) >> 8] / 100) % 10);
+				(std::uint8_t)(V[(opcode & 0x0F00) >> 8] / 100);
 			memory[I + 1] =
-			    std::floor((V[(opcode & 0x0F00) >> 8] / 10) % 10);
+			   (std::uint8_t)(V[(opcode & 0x0F00) >> 8] / 10) % 10;
 			memory[I + 2] =
-			    std::floor(V[(opcode & 0x0F00) >> 8] % 10);
+			   (std::uint8_t) (V[(opcode & 0x0F00) >> 8] % 10);
 			pc += 2;
 			break;
 		case 0x0055:
-			for (int i = 0; i < V[(opcode & 0x0F00) >> 8] + 1;
+			for (int i = 0; i < ((opcode & 0x0F00) >> 8);
 			     ++i) {
 				memory[I + i] = V[i];
 			}
@@ -355,7 +357,6 @@ void Chip8::execute_cycle() {
 			     "segment.\n";
 	}
 
-	// TODO: Rework Sound implementation.
 	if (sound_timer > 0) {
 		--sound_timer;
 	}
@@ -364,27 +365,53 @@ void Chip8::execute_cycle() {
 		--delay_timer;
 	}
 }
-
-void Chip8::load_rom(const char *rom_path) {
-	// Initialize the Chip-8
+// Initialise and load ROM into memory
+bool Chip8::load_rom(const char *rom_path) {
+	// Initialise
 	init();
+	std::cout << "Loading currently selected ROM: " << rom_path << "\n";
 
-	std::cout << "Loading selected rom: " << rom_path << "\n";
-
-	std::ifstream file(rom_path, std::ios::binary | std::ios::ate);
-	// If file opens, create a buffer
-	if (file.is_open()) {
-		std::streampos rom_size = file.tellg();
-		char *rom_buffer = new char[rom_size];
-
-		file.seekg(0, std::ios::beg);
-		file.read(rom_buffer, rom_size);
-		file.close();
-
-		for (int i = 0; i < rom_size; ++i) {
-			memory[0x200 + i] = rom_buffer[i];
-		}
-		// Clear the buffer to prevent memory leak
-		delete[] rom_buffer;
+	// Open ROM file
+	FILE *rom = fopen(rom_path, "rb");
+	if (rom == NULL) {
+		std::cerr << "Failed to open ROM" << std::endl;
+		return false;
 	}
+
+	// Get file size
+	fseek(rom, 0, SEEK_END);
+	long rom_size = ftell(rom);
+	rewind(rom);
+
+	// Allocate memory to store rom
+	char *rom_buffer = (char *)malloc(sizeof(char) * rom_size);
+	if (rom_buffer == NULL) {
+		std::cerr << "Failed to allocate memory for ROM" << std::endl;
+		return false;
+	}
+
+	// Copy ROM into buffer
+	size_t result = fread(rom_buffer, sizeof(char), (size_t)rom_size, rom);
+	if (result != rom_size) {
+		std::cerr << "Failed to read ROM" << std::endl;
+		return false;
+	}
+
+	// Copy buffer to memory
+	if ((4096 - 512) > rom_size) {
+		for (int i = 0; i < rom_size; ++i) {
+			memory[i + 512] =
+			    (uint8_t)rom_buffer[i]; // Load into memory starting
+						    // at 0x200 (=512)
+		}
+	} else {
+		std::cerr << "ROM too large to fit in memory" << std::endl;
+		return false;
+	}
+
+	// Clean up
+	fclose(rom);
+	free(rom_buffer);
+
+	return true;
 }

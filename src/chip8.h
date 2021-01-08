@@ -22,8 +22,7 @@ struct Chip8 {
 	bool drawFlag;
 
 	// Chip-8 Functions
-
 	void init();
 	void execute_cycle();
-	void load_rom(const char* rom_path);
+	bool load_rom(const char* rom_path);
 };

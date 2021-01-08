@@ -1,6 +1,6 @@
 #include <cstdint>
 
-struct chip8 {
+struct Chip8 {
 
 	// Chip-8 Specs
 

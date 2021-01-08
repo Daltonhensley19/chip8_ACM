@@ -32,7 +32,7 @@ std::uint8_t font_set[80]{
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-void chip8::init() {
+void Chip8::init() {
 	pc = 0x200;
 	sp = 0;
 	opcode = 0;
@@ -67,7 +67,7 @@ void chip8::init() {
 	srand(time(NULL));
 }
 
-void chip8::execute_cycle() {
+void Chip8::execute_cycle() {
 	opcode = memory[pc] << 8 | memory[pc + 1];
 
 	switch (opcode & 0xF000) {
@@ -365,7 +365,7 @@ void chip8::execute_cycle() {
 	}
 }
 
-void chip8::load_rom(const char *rom_path) {
+void Chip8::load_rom(const char *rom_path) {
 	// Initialize the Chip-8
 	init();
 
@@ -373,14 +373,14 @@ void chip8::load_rom(const char *rom_path) {
 
 	std::ifstream file(rom_path, std::ios::binary | std::ios::ate);
 	// If file opens, create a buffer
-	if(file.is_open()) {
+	if (file.is_open()) {
 		std::streampos rom_size = file.tellg();
-		char* rom_buffer = new char[rom_size];
+		char *rom_buffer = new char[rom_size];
 
 		file.seekg(0, std::ios::beg);
 		file.read(rom_buffer, rom_size);
 		file.close();
-		
+
 		for (int i = 0; i < rom_size; ++i) {
 			memory[0x200 + i] = rom_buffer[i];
 		}

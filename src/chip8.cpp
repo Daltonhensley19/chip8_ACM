@@ -5,6 +5,9 @@
 #include <iostream>
 #include <random>
 #include <time.h>
+
+#define Vx V[(opcode & 0x0F00) >> 8]
+#define Vy V[(opcode & 0x00F0) >> 4]
 /* Key:
 nnn or addr - A 12-bit value, the lowest 12 bits of the instruction
 n or nibble - A 4-bit value, the lowest 4 bits of the instruction
@@ -108,7 +111,7 @@ void Chip8::execute_cycle() {
 		break;
 	// Skip next instruction if Vx == kk
 	case 0x3000:
-		if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
+		if (Vx == (opcode & 0x00FF)) {
 			pc += 4;
 		} else {
 			pc += 2;
@@ -116,7 +119,7 @@ void Chip8::execute_cycle() {
 		break;
 	// Skip next instruction if Vx != kk
 	case 0x4000:
-		if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
+		if (Vx != (opcode & 0x00FF)) {
 			pc += 4;
 		} else {
 			pc += 2;
@@ -124,7 +127,7 @@ void Chip8::execute_cycle() {
 		break;
 	// Skip next instruction if Vx == Vy
 	case 0x5000:
-		if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]) {
+		if (Vx == Vy) {
 			pc += 4;
 		} else {
 			pc += 2;
@@ -132,42 +135,41 @@ void Chip8::execute_cycle() {
 		}
 	// Set Vx = kk
 	case 0x6000:
-		V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
+		Vx = (opcode & 0x00FF);
 		pc += 2;
 		break;
 	// Set Vx += kk
 	case 0x7000:
-		V[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
+		Vx += (opcode & 0x00FF);
 		pc += 2;
 		break;
 	case 0x8000:
 		switch (opcode & 0x000F) {
 		// Set Vx = Vy
 		case 0x0000:
-			V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+			Vx = Vy;
 			pc += 2;
 			break;
 		// Set Vx |= Vy
 		case 0x0001:
-			V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
+			Vx |= Vy;
 			pc += 2;
 			break;
 		// Set Vx &= Vy
 		case 0x0002:
-			V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
+			Vx &= Vy;
 			pc += 2;
 			break;
 		// Set Vx ^= Vy
 		case 0x0003:
-			V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
+			Vx ^= Vy;
 			pc += 2;
 			break;
 		// Set Vx = Vx + Vy, set VF = carry if Vy > (0xF
 		// - Vx)
 		case 0x0004:
-			V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
-			if (V[(opcode & 0x00F0) >> 4] >
-			    (0x00FF - V[opcode & 0x0F00 >> 8])) {
+			Vx += Vy;
+			if (Vy > (0x00FF - Vx)) {
 				V[0xF] = 1;
 			} else {
 				V[0xF] = 0;
@@ -176,37 +178,34 @@ void Chip8::execute_cycle() {
 			break;
 		// Set Vx = Vx - Vy, set VF = NOT borrow
 		case 0x0005:
-			if (V[(opcode & 0x0F00) >> 8] >
-			    V[(opcode & 0x00F0) >> 4]) {
+			if (Vx > Vy) {
 				V[0xF] = 1;
 			} else {
 				V[0xF] = 0;
 			}
-			V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
+			Vx -= Vy;
 			pc += 2;
 			break;
 		// Set Vx = Vx SHR 1
 		case 0x0006:
-			V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x0001;
-			V[(opcode & 0x0F00) >> 8] >>= 1;
+			V[0xF] = Vx & 0x0001;
+			Vx >>= 1;
 			pc += 2;
 			break;
 		// Set Vx = Vy - Vx, set VF = NOT borrow.
 		case 0x0007:
-			if (V[(opcode & 0x00F0) >> 4] >
-			    V[(opcode & 0x0F00) >> 8]) {
+			if (Vy > Vx) {
 				V[0xF] = 1;
 			} else {
 				V[0xF] = 0;
 			}
-			V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] -
-						    V[(opcode & 0x0F00) >> 8];
+			Vx = Vy - Vx;
 			pc += 2;
 			break;
 		// Set Vx = Vx SHL 1
 		case 0x000E:
-			V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
-			V[(opcode & 0x0F00) >> 8] <<= 1;
+			V[0xF] = Vx >> 7;
+			Vx <<= 1;
 			pc += 2;
 			break;
 		default:
@@ -216,7 +215,7 @@ void Chip8::execute_cycle() {
 		break;
 	// Skip next instruction if Vx != Vy
 	case 0x9000:
-		if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]) {
+		if (Vx != Vy) {
 			pc += 4;
 		} else {
 			pc += 2;
@@ -231,12 +230,12 @@ void Chip8::execute_cycle() {
 		pc = (opcode & 0x0FFF) + V[0];
 		break;
 	case 0xC000:
-		V[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x00FF);
+		Vx = (rand() % 256) & (opcode & 0x00FF);
 		pc += 2;
 		break;
 	case 0xD000: {
-		unsigned short x = V[(opcode & 0x0F00) >> 8];
-		unsigned short y = V[(opcode & 0x00F0) >> 4];
+		unsigned short x = Vx;
+		unsigned short y = Vy;
 		unsigned short height = opcode & 0x000F;
 		unsigned short pixel;
 
@@ -262,14 +261,14 @@ void Chip8::execute_cycle() {
 	case 0xE000:
 		switch (opcode & 0x00FF) {
 		case 0x009E:
-			if (keypad[V[(opcode & 0x0F00) >> 8]] != 0) {
+			if (keypad[Vx] != 0) {
 				pc += 4;
 			} else {
 				pc += 2;
 			}
 			break;
 		case 0x00A1:
-			if (keypad[V[(opcode & 0x0F00) >> 8]] == 0) {
+			if (keypad[Vx] == 0) {
 				pc += 4;
 			} else {
 				pc += 2;
@@ -283,7 +282,7 @@ void Chip8::execute_cycle() {
 	case 0xF000:
 		switch (opcode & 0x00FF) {
 		case 0x0007:
-			V[(opcode & 0x0F00) >> 8] = delay_timer;
+			Vx = delay_timer;
 			pc += 2;
 			break;
 		case 0x000A: {
@@ -291,7 +290,7 @@ void Chip8::execute_cycle() {
 
 			for (int i = 0; i < 16; ++i) {
 				if (keypad[i] != 0) {
-					V[(opcode & 0x0F00) >> 8] = i;
+					Vx = i;
 					key_pushed = true;
 				}
 			}
@@ -302,30 +301,30 @@ void Chip8::execute_cycle() {
 			pc += 2;
 		} break;
 		case 0x0015:
-			delay_timer = V[(opcode & 0x0F00) >> 8];
+			delay_timer = Vx;
 			pc += 2;
 			break;
 		case 0x0018:
-			sound_timer = V[(opcode & 0x0F00) >> 8];
+			sound_timer = Vx;
 			pc += 2;
 			break;
 		case 0x001E:
-			if (I + V[(opcode & 0x0F00) >> 8] > 0xFFF) {
+			if (I + Vx > 0xFFF) {
 				V[0xF] = 1;
 			} else {
 				V[0xF] = 0;
 			}
-			I += V[(opcode & 0x0F00) >> 8];
+			I += Vx;
 			pc += 2;
 			break;
 		case 0x0029:
-			I = V[(opcode & 0x0F00) >> 8] * 0x5; // 4x5 Sprite
+			I = Vx * 0x5; // 4x5 Sprite
 			pc += 2;
 			break;
 		case 0x0033:
-			memory[I] = V[(opcode & 0x0F00) >> 8] / 100;
-			memory[I + 1] = (V[(opcode & 0x0F00) >> 8] / 10) % 10;
-			memory[I + 2] = V[(opcode & 0x0F00) >> 8] % 10;
+			memory[I] = Vx / 100;
+			memory[I + 1] = (Vx / 10) % 10;
+			memory[I + 2] = Vx % 10;
 			pc += 2;
 			break;
 		case 0x0055:
@@ -336,8 +335,7 @@ void Chip8::execute_cycle() {
 			pc += 2;
 			break;
 		case 0x0065:
-			for (int i = 0; i <= ((opcode & 0x0F00) >> 8);
-			     ++i) {
+			for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
 				V[i] = memory[I + i];
 			}
 			I += ((opcode & 0x0F00) >> 8) + 1;

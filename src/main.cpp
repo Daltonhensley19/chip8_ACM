@@ -7,7 +7,6 @@
 
 #include "chip8.h"
 
-using namespace std;
 
 // Keypad keymap
 uint8_t keymap[16] = {
@@ -33,7 +32,7 @@ int main(int argc, char **argv) {
 
     // Display terminal usage
     if (argc != 2) {
-        cout << "Usage: chip8 <ROM file>" << endl;
+	    std::cout << "Usage: chip8 <ROM file>" << "\n";
         return 1;
     }
 
@@ -73,7 +72,7 @@ int main(int argc, char **argv) {
             64, 32);
 
     // Pixel buffer
-    uint32_t pixels[2048];
+    std::uint32_t pixels[2048];
 
 
     load:
@@ -120,7 +119,7 @@ int main(int argc, char **argv) {
 
             // We will then store pixels in the temporary buffer
             for (int i = 0; i < 2048; ++i) {
-                uint8_t pixel = chip8.gfx[i];
+		    std::uint8_t pixel = chip8.gfx[i];
                 pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
             }
             // Update SDL texture

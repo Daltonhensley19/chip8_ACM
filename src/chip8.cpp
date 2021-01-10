@@ -69,7 +69,8 @@ void Chip8::init() {
 	// Generate a random seed based on current time
 	srand(time(NULL));
 }
-
+// In order to emulate the Chip-8 on a cycle-level, we have to use the
+// fetch-decode-execute process.
 void Chip8::execute_cycle() {
 	opcode = memory[pc] << 8 | memory[pc + 1];
 
@@ -226,13 +227,17 @@ void Chip8::execute_cycle() {
 		I = opcode & 0x0FFF;
 		pc += 2;
 		break;
+	// Jump to location nnn + V0
 	case 0xB000:
 		pc = (opcode & 0x0FFF) + V[0];
 		break;
+	// Set Vx = random byte AND kk
 	case 0xC000:
 		Vx = (rand() % 256) & (opcode & 0x00FF);
 		pc += 2;
 		break;
+	// Display n-byte sprite starting at memory location I at (Vx, Vy), set
+	// VF = collision
 	case 0xD000: {
 		unsigned short x = Vx;
 		unsigned short y = Vy;
@@ -260,6 +265,7 @@ void Chip8::execute_cycle() {
 
 	case 0xE000:
 		switch (opcode & 0x00FF) {
+		// Skip next instruction if key with the value of Vx is pressed
 		case 0x009E:
 			if (keypad[Vx] != 0) {
 				pc += 4;
@@ -267,6 +273,8 @@ void Chip8::execute_cycle() {
 				pc += 2;
 			}
 			break;
+		// Skip next instruction if key with the value of Vx is not
+		// pressed
 		case 0x00A1:
 			if (keypad[Vx] == 0) {
 				pc += 4;
@@ -281,10 +289,12 @@ void Chip8::execute_cycle() {
 		break;
 	case 0xF000:
 		switch (opcode & 0x00FF) {
+		// Set Vx = delay timer value
 		case 0x0007:
 			Vx = delay_timer;
 			pc += 2;
 			break;
+		// Wait for a key press, store the value of the key in Vx
 		case 0x000A: {
 			bool key_pushed = false;
 
@@ -300,14 +310,17 @@ void Chip8::execute_cycle() {
 			}
 			pc += 2;
 		} break;
+		// Set delay timer = Vx
 		case 0x0015:
 			delay_timer = Vx;
 			pc += 2;
 			break;
+		// Set sound timer = Vx
 		case 0x0018:
 			sound_timer = Vx;
 			pc += 2;
 			break;
+		// Set I = I + Vx
 		case 0x001E:
 			if (I + Vx > 0xFFF) {
 				V[0xF] = 1;
@@ -317,16 +330,21 @@ void Chip8::execute_cycle() {
 			I += Vx;
 			pc += 2;
 			break;
+		// Set I = location of sprite for digit Vx
 		case 0x0029:
 			I = Vx * 0x5; // 4x5 Sprite
 			pc += 2;
 			break;
+		// Store BCD representation of Vx in memory locations I, I+1,
+		// and I+2
 		case 0x0033:
 			memory[I] = Vx / 100;
 			memory[I + 1] = (Vx / 10) % 10;
 			memory[I + 2] = Vx % 10;
 			pc += 2;
 			break;
+		// Store registers V0 through Vx in memory starting at location
+		// I
 		case 0x0055:
 			for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
 				memory[I + i] = V[i];
@@ -334,6 +352,8 @@ void Chip8::execute_cycle() {
 			I += ((opcode & 0x0F00) >> 8) + 1;
 			pc += 2;
 			break;
+		// Read registers V0 through Vx from memory starting at location
+		// I
 		case 0x0065:
 			for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
 				V[i] = memory[I + i];

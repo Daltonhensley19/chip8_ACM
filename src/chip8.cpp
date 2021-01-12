@@ -1,4 +1,4 @@
-#include "chip8.h"
+#include "../includes/chip8.h"
 
 #include <cmath>
 #include <fstream>

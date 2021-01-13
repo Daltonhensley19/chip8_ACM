@@ -14,7 +14,7 @@ y - A 4-bit value, the upper 4 bits of the low byte of the instruction
 kk or byte - An 8-bit value, the lowest 8 bits of the instruction
 */
 
-std::uint8_t font_set[80]{
+static std::uint8_t font_set[80]{
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2

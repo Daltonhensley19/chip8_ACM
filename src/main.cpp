@@ -5,7 +5,7 @@
 #include "SDL2/SDL.h"
 
 
-#include "chip8.h"
+#include "../includes/chip8.h"
 
 
 // Keypad keymap

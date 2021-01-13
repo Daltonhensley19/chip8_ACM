@@ -1,7 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include "stdint.h"
+#include <cstdint>
 #include "SDL2/SDL.h"
 
 

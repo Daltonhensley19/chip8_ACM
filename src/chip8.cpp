@@ -41,8 +41,8 @@ void Chip8::init() {
 
   // Clear Memory
 
-  for (int i = 0; i < 4096; ++i) {
-    memory[i] = 0;
+  for (unsigned char &i : memory) {
+    i = 0;
   }
 
   // Clear V Register, Stack, Keypad
@@ -55,8 +55,8 @@ void Chip8::init() {
 
   // Clear Display (Graphics buffer)
 
-  for (int i = 0; i < 2048; ++i) {
-    gfx[i] = 0;
+  for (unsigned char &i : gfx) {
+    i = 0;
   }
   // Load Chip-8 font into memory
   for (int i = 0; i < 80; ++i) {
@@ -82,8 +82,8 @@ void Chip8::execute_cycle() {
     switch (opcode & 0x000F) {
     // Clear display
     case 0x0000:
-      for (int i = 0; i < 2048; ++i) {
-        gfx[i] = 0;
+      for (unsigned char &i : gfx) {
+        i = 0;
       }
       drawFlag = true;
       pc += 2;

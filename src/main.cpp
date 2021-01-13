@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     int h = 512;                    // Window height
 
     // First, we will create a window
-    SDL_Window* window = nullptr;
+    SDL_Window* window;
 
     // Check to see if SDL can initialize
     if ( SDL_Init(SDL_INIT_EVERYTHING) < 0 ) {

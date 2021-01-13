@@ -1,10 +1,8 @@
 #include "chip8.h"
 
 #include <cmath>
-#include <fstream>
 #include <iostream>
-#include <random>
-#include <time.h>
+#include <ctime>
 
 #define Vx V[(opcode & 0x0F00) >> 8]
 #define Vy V[(opcode & 0x00F0) >> 4]
@@ -60,6 +58,10 @@ void Chip8::init() {
 	for (int i = 0; i < 2048; ++i) {
 		gfx[i] = 0;
 	}
+	// Load Chip-8 font into memory
+    for (int i = 0; i < 80; ++i) {
+        memory[i] = font_set[i];
+    }
 
 	// Clear Sound/Delay Timers
 

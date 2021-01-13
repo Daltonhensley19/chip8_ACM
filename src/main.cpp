@@ -30,6 +30,9 @@ uint8_t keymap[16] = {
 
 int main(int argc, char **argv) {
 
+
+
+
     // Display terminal usage
     if (argc != 2) {
 	    std::cout << "Usage: chip8 <ROM file>" << "\n";

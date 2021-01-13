@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.19.2)
+cmake_minimum_required(VERSION 3.17.5)
 
 project(chip8)
 
-set(SOURCE_FILES src/main.cpp src/chip8.cpp)
+set(SOURCE_FILES ../../src/main.cpp ../../src/chip8.cpp)
 
 # CXX Flags
-set(set CMAKE_CXX_FLAGS "-std=c++20 -O3") 
+set(CMAKE_CXX_FLAGS "-std=c++20 -g") 
 
 add_executable(chip8 ${SOURCE_FILES})
 

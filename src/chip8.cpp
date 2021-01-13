@@ -69,7 +69,7 @@ void Chip8::init() {
 	sound_timer = 0;
 
 	// Generate a random seed based on current time
-	srand(time(NULL));
+	srand(time(nullptr));
 }
 // In order to emulate the Chip-8 on a cycle-level, we have to use the
 // fetch-decode-execute process.
@@ -389,7 +389,7 @@ bool Chip8::load_rom(const char *rom_path) {
 
 	// Open ROM file
 	FILE *rom = fopen(rom_path, "rb");
-	if (rom == NULL) {
+	if (rom == nullptr) {
 		std::cerr << "Failed to open ROM" << std::endl;
 		return false;
 	}
@@ -401,7 +401,7 @@ bool Chip8::load_rom(const char *rom_path) {
 
 	// Allocate memory to store rom
 	char *rom_buffer = (char *)malloc(sizeof(char) * rom_size);
-	if (rom_buffer == NULL) {
+	if (rom_buffer == nullptr) {
 		std::cerr << "Failed to allocate memory for ROM" << std::endl;
 		return false;
 	}

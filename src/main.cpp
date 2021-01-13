@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     int h = 512;                    // Window height
 
     // First, we will create a window
-    SDL_Window* window = NULL;
+    SDL_Window* window = nullptr;
 
     // Check to see if SDL can initialize
     if ( SDL_Init(SDL_INIT_EVERYTHING) < 0 ) {
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             w, h, SDL_WINDOW_SHOWN
     );
-    if (window == NULL){
+    if (window == nullptr){
         printf( "Window could not be created! SDL_Error: %s\n",
                 SDL_GetError() );
         exit(2);
@@ -126,10 +126,10 @@ int main(int argc, char **argv) {
                 pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
             }
             // Update SDL texture
-            SDL_UpdateTexture(sdlTexture, NULL, pixels, 64 * sizeof(Uint32));
+            SDL_UpdateTexture(sdlTexture, nullptr, pixels, 64 * sizeof(Uint32));
             // Cleanup
             SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, sdlTexture, NULL, NULL);
+            SDL_RenderCopy(renderer, sdlTexture, nullptr, nullptr);
             SDL_RenderPresent(renderer);
         }
 

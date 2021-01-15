@@ -2,6 +2,8 @@
 
 struct Chip8 {
 
+  Chip8() : pc(0x200), sp(0), opcode(0), I(0) {}
+
   // Chip-8 Specs
 
   std::uint16_t sp;        // Stack Pointer

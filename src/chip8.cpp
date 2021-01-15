@@ -1,6 +1,5 @@
 #include "../include/chip8.h"
 
-
 #include <iostream>
 
 #define Vx V[(opcode & 0x0F00) >> 8]
@@ -33,10 +32,6 @@ static std::uint8_t font_set[80]{
 };
 
 void Chip8::init() {
-  pc = 0x200;
-  sp = 0;
-  opcode = 0;
-  I = 0;
 
   // Clear Memory
 

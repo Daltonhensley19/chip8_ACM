@@ -1,7 +1,6 @@
 #include "../include/chip8.h"
 
-#include <cmath>
-#include <ctime>
+
 #include <iostream>
 
 #define Vx V[(opcode & 0x0F00) >> 8]

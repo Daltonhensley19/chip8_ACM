@@ -4,7 +4,7 @@
 #include <iostream>
 #include <thread>
 
-#include "../includes/chip8.h"
+#include "../include/chip8.h"
 
 // Keypad keymap
 uint8_t keymap[16] = {

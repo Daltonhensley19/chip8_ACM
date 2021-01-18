@@ -1,7 +1,6 @@
 #include "SDL2/SDL.h"
 #include <chrono>
 #include <cstdint>
-#include <iostream>
 #include <thread>
 #include "../lib/indicators/single_include/indicators/indicators.hpp"
 #include "../lib/fmt/include/fmt/core.h"
@@ -34,17 +33,17 @@ int main(int argc, char **argv) {
     // Update bar state
     bar.set_progress(10); // 10% done
 
-    // do some work
+
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
 
     bar.set_option(option::PostfixText{"Loading ROM 2/2 \n"});
 
     bar.set_progress(100); // 100% done
 
-    // do some more work
-    std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(700));
     show_console_cursor(true);
+
     // Display terminal usage
     if (argc != 2) {
         fmt::print("Usage: chip8 <ROM file> \n");

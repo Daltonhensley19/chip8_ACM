@@ -1,6 +1,6 @@
 #include "../include/chip8.h"
 
-#include <iostream>
+
 #include "../lib/fmt/include/fmt/core.h"
 
 #define Vx V[(opcode & 0x0F00) >> 8]

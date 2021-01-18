@@ -1,7 +1,8 @@
 #include <cstdint>
 
 struct Chip8 {
-
+    // Using member initializer list with the Chip8 constructor instead of
+    // using the Chip8::init() function
     Chip8() : pc(0x200), sp(0), opcode(0), I(0) {}
 
     // Chip-8 Specs

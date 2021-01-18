@@ -5,7 +5,7 @@ project(chip8)
 set(SOURCE_FILES ../../src/main.cpp ../../src/chip8.cpp ../../src/utility.cpp)
 
 # CXX Flags
-set(set CMAKE_CXX_FLAGS "-std=c++20 -O3") 
+set(set CMAKE_CXX_FLAGS "-std=c++20 -O3")
 
 add_executable(chip8 ${SOURCE_FILES})
 

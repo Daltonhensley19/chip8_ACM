@@ -1,6 +1,7 @@
 #include "../include/chip8.h"
 
 #include <iostream>
+#include "../lib/fmt/include/fmt/core.h"
 
 #define Vx V[(opcode & 0x0F00) >> 8]
 #define Vy V[(opcode & 0x00F0) >> 4]
@@ -126,10 +127,7 @@ void Chip8::execute_cycle() {
                     pc += 2;
                     break;
                 default:
-                    std::cout << "[ERROR]: Invalid opcode. "
-                                 "Segment 0000. "
-                                 "Draw-screen error."
-                              << "\n";
+                    fmt::format("[ERROR]: Invalid opcode. Segment 0000. Draw-screen error. Opcode: {}\n", opcode);
                     exit(3);
             }
             break;
@@ -243,8 +241,7 @@ void Chip8::execute_cycle() {
                     pc += 2;
                     break;
                 default:
-                    std::cout << "[ERROR]: Invalid opcode, "
-                                 "Segment 8000\n";
+                    fmt::format("[ERROR]: Invalid opcode Segment 8000. Opcode: {}\n", opcode);
             }
             break;
             // Skip next instruction if Vx != Vy
@@ -315,8 +312,7 @@ void Chip8::execute_cycle() {
                     }
                     break;
                 default:
-                    std::cout << "[ERROR]: Unknown opcode. "
-                                 "Segment: 0xE000\n";
+                    fmt::format("[ERROR]: Unknown opcode. Segment: 0xE000. Opcode: {}\n", opcode);
             }
             break;
         case 0xF000:
@@ -395,13 +391,11 @@ void Chip8::execute_cycle() {
                     pc += 2;
                     break;
                 default:
-                    std::cout << "[ERROR]: Invalid instruction. "
-                                 "Segment: F000\n";
+                    fmt::format("[ERROR]: Invalid instruction. Segment: F000. Opcode: {}\n", opcode);
             }
             break;
         default:
-            std::cout << "[ERROR]: Invalid instruction. Invalid "
-                         "segment.\n";
+            fmt::format("[ERROR]: Invalid instruction. Invalid opcode: {}\n", opcode);
     }
 
     if (sound_timer > 0) {

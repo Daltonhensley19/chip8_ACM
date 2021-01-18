@@ -4,8 +4,10 @@
 #include <iostream>
 #include <thread>
 #include "../lib/indicators/single_include/indicators/indicators.hpp"
+#include "../lib/fmt/include/fmt/core.h"
 
 #include "../include/chip8.h"
+
 
 // Keypad keymap
 uint8_t keymap[16] = {
@@ -45,8 +47,7 @@ int main(int argc, char **argv) {
     show_console_cursor(true);
     // Display terminal usage
     if (argc != 2) {
-        std::cout << "Usage: chip8 <ROM file>"
-                  << "\n";
+        fmt::print("Usage: chip8 <ROM file> \n");
         return 1;
     }
 
@@ -60,14 +61,14 @@ int main(int argc, char **argv) {
 
     // Check to see if SDL can initialize
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        fmt::format("SDL could not initialize! SDL_Error: {}\n", SDL_GetError());
         exit(1);
     }
 
     window = SDL_CreateWindow("CHIP-8 Emulator", SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN);
     if (window == nullptr) {
-        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+        fmt::format("Window could not be created! SDL_Error: {}\n", SDL_GetError());
         exit(2);
     }
 

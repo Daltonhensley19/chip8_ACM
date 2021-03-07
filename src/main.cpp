@@ -52,8 +52,8 @@ int main(int argc, char **argv) {
 
     Chip8 chip8 = Chip8(); // Initialise Chip8
 
-    int w = 1024; // Window width
-    int h = 512;  // Window height
+    const int w = 1024; // Window width
+    const int h = 512;  // Window height
 
     // First, we will create a window
     SDL_Window *window;

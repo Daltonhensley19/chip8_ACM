@@ -1,55 +1,37 @@
 #include <iostream>
+#include <fstream>
 
 #include "../include/chip8.h"
+#include "../lib/fmt/include/fmt/core.h"
 
 // Initialize and load ROM into memory
+const u16 MEMORY_START = 512;
+
 bool Chip8::load_rom(const char *rom_path) {
     // Initialize
     init();
     std::cout << "Loading currently selected ROM: " << rom_path << "\n";
 
-    // Open ROM file
-    FILE *rom = fopen(rom_path, "rb");
-    if (rom == nullptr) {
-        std::cerr << "Failed to open ROM" << std::endl;
+    std::ifstream infile(rom_path, std::ios::binary | std::ios::ate); // Read ROM starting at end and in binary mode
+
+    // Check to see if successful
+    if (!infile.good()) {
+        fmt::format("Error! Could not read file: {} ", rom_path);
         return false;
-    }
-
-    // Get file size
-    fseek(rom, 0, SEEK_END);
-    long rom_size = ftell(rom);
-    rewind(rom);
-
-    // Allocate memory to store rom
-    char *rom_buffer = (char *) malloc(sizeof(char) * rom_size);
-
-    if (rom_buffer == nullptr) {
-        std::cerr << "Failed to allocate memory for ROM" << std::endl;
-        return false;
-    }
-
-    // Copy ROM into buffer
-    size_t result = fread(rom_buffer, sizeof(char), (size_t) rom_size, rom);
-
-    if (result != rom_size) {
-        std::cerr << "Failed to read ROM" << std::endl;
-        return false;
-    }
-
-    // Copy buffer to memory
-    if ((4096 - 512) > rom_size) {
-        for (int i = 0; i < rom_size; ++i) {
-            memory[i + 512] = (uint8_t) rom_buffer[i]; // Load into memory starting
-            // at 0x200 (=512)
-        }
     } else {
-        std::cerr << "ROM too large to fit in memory" << std::endl;
-        return false;
+        std::streampos size = infile.tellg(); // Get ROM size
+        char *buffer = new char[size];
+
+        infile.seekg(0, std::ios::beg); // Move read position to beginning of ROM
+        infile.read(buffer, size);
+        infile.close();
+
+        for (long i = 0; i < size; i++) {
+            memory[i + MEMORY_START] = (u8) buffer[i]; // Chip-8 memory starts at 512 bytes
+        }
+
+        delete[] buffer;
     }
-
-    // Clean up
-    fclose(rom);
-    free(rom_buffer);
-
     return true;
+
 }

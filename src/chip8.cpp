@@ -82,7 +82,7 @@ void Chip8::init() {
 
     // Clear V Register, Stack, Keypad
 
-    for (int i = 0; i < 16; ++i) {
+    for (int i = 0; i < 16; i++) {
         stack[i] = 0;
         V[i] = 0;
         keypad[i] = 0;
@@ -94,7 +94,7 @@ void Chip8::init() {
         i = 0;
     }
     // Load Chip-8 font into memory
-    for (int i = 0; i < FONT_SIZE; ++i) {
+    for (int i = 0; i < FONT_SIZE; i++) {
         memory[i] = font_set[i];
     }
 
@@ -149,7 +149,7 @@ void Chip8::execute_cycle() {
         case Opcode2nnn:
             fmt::print("Current Instruction: CALL\n");
             stack[sp] = pc;
-            ++sp;
+            sp++;
             pc = opcode & 0x0FFF;
             break;
             // Skip next instruction if Vx == kk
@@ -362,7 +362,7 @@ void Chip8::execute_cycle() {
                     fmt::print("Current Instruction: LD Vx, K\n");
                     bool key_pushed = false;
 
-                    for (int i = 0; i < 16; ++i) {
+                    for (int i = 0; i < 16; i++) {
                         if (keypad[i] != 0) {
                             Vx = i;
                             key_pushed = true;
@@ -417,7 +417,7 @@ void Chip8::execute_cycle() {
                     // I
                 case OpcodeFx55:
                     fmt::print("Current Instruction: LD [I], Vx\n");
-                    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
+                    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
                         memory[I + i] = V[i];
                     }
                     I += ((opcode & 0x0F00) >> 8) + 1;
@@ -427,7 +427,7 @@ void Chip8::execute_cycle() {
                     // I
                 case OpcodeFx65:
                     fmt::print("Current Instruction: LD Vx, [I]\n");
-                    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
+                    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
                         V[i] = memory[I + i];
                     }
                     I += ((opcode & 0x0F00) >> 8) + 1;

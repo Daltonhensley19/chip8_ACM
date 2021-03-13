@@ -1,10 +1,13 @@
-#include "../include/chip8.h"
+#include <chrono>
 
+#include "../include/chip8.h"
 
 #include "../lib/fmt/include/fmt/core.h"
 
 #define Vx V[(opcode & 0x0F00) >> 8]
 #define Vy V[(opcode & 0x00F0) >> 4]
+
+
 /* Key:
 nnn or addr - A 12-bit value, the lowest 12 bits of the instruction
 n or nibble - A 4-bit value, the lowest 4 bits of the instruction
@@ -47,9 +50,10 @@ enum opcodes {
     OpcodeFx33 = 0x0033,
     OpcodeFx55 = 0x0055,
     OpcodeFx65 = 0x0065
-
 };
-static std::uint8_t font_set[80]{
+
+const int FONT_SIZE = 80;
+static u8 font_set[FONT_SIZE]{
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
         0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -90,7 +94,7 @@ void Chip8::init() {
         i = 0;
     }
     // Load Chip-8 font into memory
-    for (int i = 0; i < 80; ++i) {
+    for (int i = 0; i < FONT_SIZE; ++i) {
         memory[i] = font_set[i];
     }
 
@@ -100,7 +104,8 @@ void Chip8::init() {
     sound_timer = 0;
 
     // Generate a random seed based on current time
-    srand(time(nullptr));
+    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+    srand(seed);
 }
 
 // In order to emulate the Chip-8 on a cycle-level, we have to use the
@@ -114,6 +119,7 @@ void Chip8::execute_cycle() {
             switch (opcode & 0x000F) {
                 // Clear display
                 case Opcode00E0:
+                    fmt::print("Current Instruction: CLS\n");
                     for (unsigned char &i : gfx) {
                         i = 0;
                     }
@@ -122,27 +128,33 @@ void Chip8::execute_cycle() {
                     break;
                     // Return from subroutine
                 case Opcode00EE:
+                    fmt::print("Current Instruction: RET\n");
                     --sp;
                     pc = stack[sp];
                     pc += 2;
                     break;
                 default:
-                    fmt::format("[ERROR]: Invalid opcode. Segment 0000. Draw-screen error. Opcode: {}\n", opcode);
+                    fmt::format("[ERROR]: Invalid opcode. Segment 0000. Draw-screen error. "
+                                "Opcode: {}\n",
+                                opcode);
                     exit(3);
             }
             break;
             // Jump to location nnn
         case Opcode1nnn:
+            fmt::print("Current Instruction: JP\n");
             pc = opcode & 0x0FFF;
             break;
             // Call subroutine at nnn
         case Opcode2nnn:
+            fmt::print("Current Instruction: CALL\n");
             stack[sp] = pc;
             ++sp;
             pc = opcode & 0x0FFF;
             break;
             // Skip next instruction if Vx == kk
         case Opcode3xkk:
+            fmt::print("Current Instruction: SE Vx, byte\n");
             if (Vx == (opcode & 0x00FF)) {
                 pc += 4;
             } else {
@@ -151,6 +163,7 @@ void Chip8::execute_cycle() {
             break;
             // Skip next instruction if Vx != kk
         case Opcode4xkk:
+            fmt::print("Current Instruction: SNE Vx, byte\n");
             if (Vx != (opcode & 0x00FF)) {
                 pc += 4;
             } else {
@@ -159,6 +172,7 @@ void Chip8::execute_cycle() {
             break;
             // Skip next instruction if Vx == Vy
         case Opcode5xy0:
+            fmt::print("Current Instruction: SE Vx, Vy\n");
             if (Vx == Vy) {
                 pc += 4;
             } else {
@@ -167,11 +181,13 @@ void Chip8::execute_cycle() {
             }
             // Set Vx = kk
         case Opcode6xkk:
+            fmt::print("Current Instruction: LD Vx, byte\n");
             Vx = (opcode & 0x00FF);
             pc += 2;
             break;
             // Set Vx += kk
         case Opcode7xkk:
+            fmt::print("Current Instruction: ADD Vx, byte\n");
             Vx += (opcode & 0x00FF);
             pc += 2;
             break;
@@ -179,27 +195,32 @@ void Chip8::execute_cycle() {
             switch (opcode & 0x000F) {
                 // Set Vx = Vy
                 case Opcode8xy0:
+                    fmt::print("Current Instruction: LD Vx, Vy\n");
                     Vx = Vy;
                     pc += 2;
                     break;
                     // Set Vx |= Vy
                 case Opcode8xy1:
+                    fmt::print("Current Instruction: OR Vx, Vy\n");
                     Vx |= Vy;
                     pc += 2;
                     break;
                     // Set Vx &= Vy
                 case Opcode8xy2:
+                    fmt::print("Current Instruction: AND Vx, Vy\n");
                     Vx &= Vy;
                     pc += 2;
                     break;
                     // Set Vx ^= Vy
                 case Opcode8xy3:
+                    fmt::print("Current Instruction: XOR Vx, Vy\n");
                     Vx ^= Vy;
                     pc += 2;
                     break;
                     // Set Vx = Vx + Vy, set VF = carry if Vy > (0xF
                     // - Vx)
                 case Opcode8xy4:
+                    fmt::print("Current Instruction: ADD Vx, Vy\n");
                     Vx += Vy;
                     if (Vy > (0x00FF - Vx)) {
                         V[0xF] = 1;
@@ -210,6 +231,7 @@ void Chip8::execute_cycle() {
                     break;
                     // Set Vx = Vx - Vy, set VF = NOT borrow
                 case Opcode8xy5:
+                    fmt::print("Current Instruction: SUB Vx, Vy\n");
                     if (Vx > Vy) {
                         V[0xF] = 1;
                     } else {
@@ -220,12 +242,14 @@ void Chip8::execute_cycle() {
                     break;
                     // Set Vx = Vx SHR 1
                 case Opcode8xy6:
+                    fmt::print("Current Instruction: SHR Vx\n");
                     V[0xF] = Vx & 0x0001;
                     Vx >>= 1;
                     pc += 2;
                     break;
                     // Set Vx = Vy - Vx, set VF = NOT borrow.
                 case Opcode8xy7:
+                    fmt::print("Current Instruction: SUBN Vx, Vy\n");
                     if (Vy > Vx) {
                         V[0xF] = 1;
                     } else {
@@ -236,6 +260,7 @@ void Chip8::execute_cycle() {
                     break;
                     // Set Vx = Vx SHL 1
                 case Opcode8xyE:
+                    fmt::print("Current Instruction: SHL Vx\n");
                     V[0xF] = Vx >> 7;
                     Vx <<= 1;
                     pc += 2;
@@ -246,6 +271,7 @@ void Chip8::execute_cycle() {
             break;
             // Skip next instruction if Vx != Vy
         case Opcode9xy0:
+            fmt::print("Current Instruction: SNE Vx, Vy\n");
             if (Vx != Vy) {
                 pc += 4;
             } else {
@@ -254,21 +280,26 @@ void Chip8::execute_cycle() {
             break;
             // Set I = nnn
         case OpcodeAnnn:
+            fmt::print("Current Instruction: LD I, addr\n");
             I = opcode & 0x0FFF;
             pc += 2;
             break;
             // Jump to location nnn + V0
         case OpcodeBnnn:
+            fmt::print("Current Instruction: JP V0, addr\n");
             pc = (opcode & 0x0FFF) + V[0];
+            pc += 2;
             break;
             // Set Vx = random byte AND kk
         case OpcodeCxkk:
+            fmt::print("Current Instruction: RND Vx, byte\n");
             Vx = (rand() % 256) & (opcode & 0x00FF);
             pc += 2;
             break;
             // Display n-byte sprite starting at memory location I at (Vx, Vy), set
             // VF = collision
         case OpcodeDxyn: {
+            fmt::print("Current Instruction: DRW Vx, Vy\n");
             unsigned short x = Vx;
             unsigned short y = Vy;
             unsigned short height = opcode & 0x000F;
@@ -296,6 +327,7 @@ void Chip8::execute_cycle() {
             switch (opcode & 0x00FF) {
                 // Skip next instruction if key with the value of Vx is pressed
                 case OpcodeEx9E:
+                    fmt::print("Current Instruction: SKP Vx\n");
                     if (keypad[Vx] != 0) {
                         pc += 4;
                     } else {
@@ -305,6 +337,7 @@ void Chip8::execute_cycle() {
                     // Skip next instruction if key with the value of Vx is not
                     // pressed
                 case OpcodeExA1:
+                    fmt::print("Current Instruction: SKNP Vx\n");
                     if (keypad[Vx] == 0) {
                         pc += 4;
                     } else {
@@ -312,18 +345,21 @@ void Chip8::execute_cycle() {
                     }
                     break;
                 default:
-                    fmt::format("[ERROR]: Unknown opcode. Segment: 0xE000. Opcode: {}\n", opcode);
+                    fmt::format("[ERROR]: Unknown opcode. Segment: 0xE000. Opcode: {}\n",
+                                opcode);
             }
             break;
         case 0xF000:
             switch (opcode & 0x00FF) {
                 // Set Vx = delay timer value
                 case OpcodeFx07:
+                    fmt::print("Current Instruction: LD Vx, DT\n");
                     Vx = delay_timer;
                     pc += 2;
                     break;
                     // Wait for a key press, store the value of the key in Vx
                 case OpcodeFx0A: {
+                    fmt::print("Current Instruction: LD Vx, K\n");
                     bool key_pushed = false;
 
                     for (int i = 0; i < 16; ++i) {
@@ -341,16 +377,19 @@ void Chip8::execute_cycle() {
                     break;
                     // Set delay timer = Vx
                 case OpcodeFx15:
+                    fmt::print("Current Instruction: LD DT, Vx\n");
                     delay_timer = Vx;
                     pc += 2;
                     break;
                     // Set sound timer = Vx
                 case OpcodeFx18:
+                    fmt::print("Current Instruction: LD ST, Vx\n");
                     sound_timer = Vx;
                     pc += 2;
                     break;
                     // Set I = I + Vx
                 case OpcodeFx1E:
+                    fmt::print("Current Instruction: ADD I, Vx\n");
                     if (I + Vx > 0xFFF) {
                         V[0xF] = 1;
                     } else {
@@ -361,12 +400,14 @@ void Chip8::execute_cycle() {
                     break;
                     // Set I = location of sprite for digit Vx
                 case OpcodeFx29:
+                    fmt::print("Current Instruction: LD F, Vx\n");
                     I = Vx * 0x5; // 4x5 Sprite
                     pc += 2;
                     break;
                     // Store BCD representation of Vx in memory locations I, I+1,
                     // and I+2
                 case OpcodeFx33:
+                    fmt::print("Current Instruction: LD B, Vx\n");
                     memory[I] = Vx / 100;
                     memory[I + 1] = (Vx / 10) % 10;
                     memory[I + 2] = Vx % 10;
@@ -375,6 +416,7 @@ void Chip8::execute_cycle() {
                     // Store registers V0 through Vx in memory starting at location
                     // I
                 case OpcodeFx55:
+                    fmt::print("Current Instruction: LD [I], Vx\n");
                     for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
                         memory[I + i] = V[i];
                     }
@@ -384,6 +426,7 @@ void Chip8::execute_cycle() {
                     // Read registers V0 through Vx from memory starting at location
                     // I
                 case OpcodeFx65:
+                    fmt::print("Current Instruction: LD Vx, [I]\n");
                     for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
                         V[i] = memory[I + i];
                     }
@@ -391,11 +434,13 @@ void Chip8::execute_cycle() {
                     pc += 2;
                     break;
                 default:
-                    fmt::format("[ERROR]: Invalid instruction. Segment: F000. Opcode: {}\n", opcode);
+                    fmt::format("[ERROR]: Invalid instruction. Segment: F000. Opcode: {}\n",
+                                opcode);
             }
             break;
         default:
-            fmt::format("[ERROR]: Invalid instruction. Invalid opcode: {}\n", opcode);
+            fmt::format("[ERROR]: Unimplemented instruction. Invalid opcode: {}\n",
+                        opcode);
     }
 
     if (sound_timer > 0) {

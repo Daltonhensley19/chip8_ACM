@@ -5,16 +5,20 @@ project(chip8)
 set(SOURCE_FILES ../../src/main.cpp ../../src/chip8.cpp ../../src/utility.cpp)
 
 # CXX Flags
-set(set CMAKE_CXX_FLAGS "-std=c++20 -O3")
+set(set CMAKE_CXX_FLAGS " -O3 -L/usr/local/lib -lSDL2 -lfmt -std=c++20")
 
 add_executable(chip8 ${SOURCE_FILES})
 
-INCLUDE(FindPkgConfig)
+FIND_PACKAGE(SDL2 REQUIRED)
+find_package(fmt)
 
-PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 
-include_directories(${SDL2_INCLUDE_DIRS})
-target_link_libraries(chip8 ${SDL2_LIBRARIES})
+INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS} ${fmt_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(chip8 ${SDL2_LIBRARIES} fmt::fmt-header-only)
+
+
+
+
 
 
 

@@ -1,15 +1,14 @@
+#include "../lib/fmt/include/fmt/core.h"
+#include "../lib/indicators/single_include/indicators/indicators.hpp"
 #include "SDL2/SDL.h"
 #include <chrono>
 #include <cstdint>
 #include <thread>
-#include "../lib/indicators/single_include/indicators/indicators.hpp"
-#include "../lib/fmt/include/fmt/core.h"
 
 #include "../include/chip8.h"
 
-
 // Keypad keymap
-uint8_t keymap[16] = {
+static u8 keymap[16] = {
         SDLK_x, SDLK_1, SDLK_2, SDLK_3, SDLK_q, SDLK_w, SDLK_e, SDLK_a,
         SDLK_s, SDLK_d, SDLK_z, SDLK_c, SDLK_4, SDLK_r, SDLK_f, SDLK_v,
 };
@@ -19,27 +18,23 @@ int main(int argc, char **argv) {
     using namespace indicators;
     show_console_cursor(false);
 
-    ProgressBar bar{
-            option::BarWidth{50},
-            option::Start{"["},
-            option::Fill{"■"},
-            option::Lead{"■"},
-            option::Remainder{"-"},
-            option::End{" ]"},
-            option::PostfixText{"Initializing Chip-8 1/2"},
-            option::ForegroundColor{Color::cyan},
-            option::FontStyles{std::vector < FontStyle > {FontStyle::bold}}
-    };
+    ProgressBar bar{option::BarWidth{50},
+                    option::Start{"["},
+                    option::Fill{"■"},
+                    option::Lead{"■"},
+                    option::Remainder{"-"},
+                    option::End{" ]"},
+                    option::PostfixText{"Initializing Chip-8 1/2"},
+                    option::ForegroundColor{Color::magenta},
+                    option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}};
     // Update bar state
     bar.set_progress(10); // 10% done
-
 
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
 
     bar.set_option(option::PostfixText{"Loading ROM 2/2 \n"});
 
     bar.set_progress(100); // 100% done
-
 
     std::this_thread::sleep_for(std::chrono::milliseconds(700));
     show_console_cursor(true);
@@ -50,7 +45,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    Chip8 chip8 = Chip8(); // Initialise Chip8
+    Chip8 chip8 = Chip8(); // Initialize Chip8
 
     const int w = 1024; // Window width
     const int h = 512;  // Window height
@@ -61,7 +56,7 @@ int main(int argc, char **argv) {
     // Check to see if SDL can initialize
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         fmt::format("SDL could not initialize! SDL_Error: {}\n", SDL_GetError());
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     window = SDL_CreateWindow("CHIP-8 Emulator", SDL_WINDOWPOS_UNDEFINED,

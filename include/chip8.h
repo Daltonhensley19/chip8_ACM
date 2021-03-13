@@ -1,5 +1,8 @@
 #include <cstdint>
 
+using u8 = std::uint8_t;
+using u16 = std::uint16_t;
+
 struct Chip8 {
     // Using member initializer list with the Chip8 constructor instead of
     // using the Chip8::init() function
@@ -7,25 +10,25 @@ struct Chip8 {
 
     // Chip-8 Specs
 
-    std::uint16_t sp;        // Stack Pointer
-    std::uint16_t stack[16]; // Stack
+    u16 sp;        // Stack Pointer, points to top of the stack
+    u16 stack[16]; // Stack
 
-    std::uint8_t memory[4096]; // System Memory
+    u8 memory[4096]; // System Memory, 4KB
 
-    std::uint8_t delay_timer; // Delay Timer
-    std::uint8_t sound_timer; // Sound Timer
+    u8 delay_timer; // Delay Timer
+    u8 sound_timer; // Sound Timer
 
-    std::uint16_t pc;     // Program Counter
-    std::uint8_t V[16];   // V Registers (V0-VF)
-    std::uint16_t I;      // Index Register
-    std::uint16_t opcode; // Current Opcode
+    u16 pc;     // Program Counter
+    u8 V[16];   // V Registers (V0-VF)
+    u16 I;      // Index Register
+    u16 opcode; // Current Opcode
 
-    std::uint8_t keypad[16];   // Keypad
-    std::uint8_t gfx[64 * 32]; // Graphics Buffer
+    u8 keypad[16];   // Keypad
+    u8 gfx[64 * 32]; // Graphics Buffer, total size = 2048 bytes (64*32)
     bool drawFlag;
 
     // Chip-8 Functions
-    void init();
+    void init(); // Function to initialize
 
     void execute_cycle();
 

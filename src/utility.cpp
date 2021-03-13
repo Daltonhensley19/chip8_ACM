@@ -10,7 +10,6 @@ const u16 MEMORY_START = 512;
 bool Chip8::load_rom(const char *rom_path) {
     // Initialize
     init();
-    std::cout << "Loading currently selected ROM: " << rom_path << "\n";
 
     std::ifstream infile(rom_path, std::ios::binary | std::ios::ate); // Read ROM starting at end and in binary mode
 

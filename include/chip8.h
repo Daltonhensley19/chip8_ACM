@@ -1,14 +1,16 @@
 #include <cstdint>
 
-const int STACK_SIZE = 16; // Up to 16 levels
+using u8 = std::uint8_t;
+using u16 = std::uint16_t;
+using u32 = std::uint32_t;
+
+const int STACK_SIZE = 16; // Up to 16 levels for a total allocation of 32 bytes (16 elements * sizeof(u16))
 const int SYSTEM_MEMORY = 4096; // 4KB of memory
 const int REGISTER_COUNT = 16; // Number of V registers
 const int GFX_HEIGHT = 32; // Graphics buffer, height
 const int GFX_WIDTH = 64; // Graphics buffer, width
 const int KEY_COUNT = 16; // Number of keys for keypad
 
-using u8 = std::uint8_t;
-using u16 = std::uint16_t;
 
 struct Chip8 {
     // Using member initializer list with the Chip8 constructor instead of
@@ -17,7 +19,7 @@ struct Chip8 {
 
     // Chip-8 Specs
 
-    u16 sp;        // Stack Pointer, points to top of the stack
+    u8 sp;        // Stack Pointer, points to top of the stack
     u16 stack[STACK_SIZE]; // Stack
 
     u8 memory[SYSTEM_MEMORY]; // System Memory, 4KB

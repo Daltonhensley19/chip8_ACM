@@ -2,7 +2,7 @@
 #include <fstream>
 
 #include "../include/chip8.h"
-#include "../lib/fmt/include/fmt/core.h"
+#include "fmt/core.h"
 
 // Initialize and load ROM into memory
 const u16 MEMORY_START = 512;

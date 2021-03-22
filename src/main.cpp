@@ -1,8 +1,7 @@
-#include "../lib/fmt/include/fmt/core.h"
+#include "fmt/core.h"
 #include "../lib/indicators/single_include/indicators/indicators.hpp"
 #include "SDL2/SDL.h"
 #include <chrono>
-#include <cstdint>
 #include <thread>
 
 #include "../include/chip8.h"
@@ -24,7 +23,7 @@ int main(int argc, char **argv) {
                     option::Lead{"■"},
                     option::Remainder{"-"},
                     option::End{" ]"},
-                    option::PostfixText{"Initializing Chip-8 1/2"},
+                    option::PostfixText{"Initializing Chip-8 1/2\n"},
                     option::ForegroundColor{Color::magenta},
                     option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}};
     // Update bar state
@@ -36,10 +35,12 @@ int main(int argc, char **argv) {
 
     bar.set_progress(100); // 100% done
 
+
     std::this_thread::sleep_for(std::chrono::milliseconds(700));
     show_console_cursor(true);
+/* *****************************************************************************************/
 
-    // Display terminal usage
+// Display terminal usage
     if (argc != 2) {
         fmt::print("Usage: chip8 <ROM file> \n");
         return 1;
@@ -75,9 +76,9 @@ int main(int argc, char **argv) {
             renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 64, 32);
 
     // Pixel buffer
-    std::uint32_t pixels[2048];
+    u32 pixels[2048];
 
-    load:
+
     // Attempt to load ROM
     if (!chip8.load_rom(argv[1]))
         return 2;
@@ -90,15 +91,13 @@ int main(int argc, char **argv) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT)
-                exit(0);
+                exit(EXIT_SUCCESS);
 
             // Process keydown events
             if (e.type == SDL_KEYDOWN) {
+                // Handle escape key to terminate program
                 if (e.key.keysym.sym == SDLK_ESCAPE)
-                    exit(0);
-
-                if (e.key.keysym.sym == SDLK_F1)
-                    goto load;
+                    exit(EXIT_SUCCESS);
 
                 for (int i = 0; i < 16; ++i) {
                     if (e.key.keysym.sym == keymap[i]) {
@@ -122,14 +121,16 @@ int main(int argc, char **argv) {
 
             // We will then store pixels in the temporary buffer
             for (int i = 0; i < 2048; ++i) {
-                std::uint8_t pixel = chip8.gfx[i];
+                u8 pixel = chip8.gfx[i];
                 pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
             }
-            // Update SDL texture
+            // Update SDL texture with new batch of pixels
             SDL_UpdateTexture(sdlTexture, nullptr, pixels, 64 * sizeof(Uint32));
-            // Cleanup
+            // Clear the renderer
             SDL_RenderClear(renderer);
+            // Copy updated SDL_Texture to the renderer
             SDL_RenderCopy(renderer, sdlTexture, nullptr, nullptr);
+            // Update renderer with copied SDL_Texture
             SDL_RenderPresent(renderer);
         }
 

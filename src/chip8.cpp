@@ -2,7 +2,8 @@
 
 #include "../include/chip8.h"
 
-#include "../lib/fmt/include/fmt/core.h"
+#include "fmt/core.h"
+
 
 #define Vx V[(opcode & 0x0F00) >> 8]
 #define Vy V[(opcode & 0x00F0) >> 4]
@@ -76,7 +77,7 @@ void Chip8::init() {
 
     // Clear Memory
 
-    for (unsigned char &i : memory) {
+    for (u8 &i : memory) {
         i = 0;
     }
 
@@ -90,7 +91,7 @@ void Chip8::init() {
 
     // Clear Display (Graphics buffer)
 
-    for (unsigned char &i : gfx) {
+    for (u8 &i : gfx) {
         i = 0;
     }
     // Load Chip-8 font into memory
@@ -111,7 +112,7 @@ void Chip8::init() {
 // In order to emulate the Chip-8 on a cycle-level, we have to use the
 // fetch-decode-execute process.
 void Chip8::execute_cycle() {
-    opcode = memory[pc] << 8 | memory[pc + 1];
+    opcode = memory[pc] << 8 | memory[pc + 1]; // Fetch next instruction
 
     switch (opcode & 0xF000) {
         case 0x0000:
@@ -120,7 +121,7 @@ void Chip8::execute_cycle() {
                 // Clear display
                 case Opcode00E0:
                     fmt::print("Current Instruction: CLS\n");
-                    for (unsigned char &i : gfx) {
+                    for (u8 &i : gfx) {
                         i = 0;
                     }
                     drawFlag = true;
@@ -137,7 +138,7 @@ void Chip8::execute_cycle() {
                     fmt::format("[ERROR]: Invalid opcode. Segment 0000. Draw-screen error. "
                                 "Opcode: {}\n",
                                 opcode);
-                    exit(3);
+                    exit(EXIT_FAILURE);
             }
             break;
             // Jump to location nnn
@@ -300,10 +301,10 @@ void Chip8::execute_cycle() {
             // VF = collision
         case OpcodeDxyn: {
             fmt::print("Current Instruction: DRW Vx, Vy\n");
-            unsigned short x = Vx;
-            unsigned short y = Vy;
-            unsigned short height = opcode & 0x000F;
-            unsigned short pixel;
+            u16 x = Vx;
+            u16 y = Vy;
+            u16 height = opcode & 0x000F;
+            u16 pixel;
 
             V[0xF] = 0;
             for (int yline = 0; yline < height; yline++) {

@@ -124,6 +124,7 @@ void Chip8::execute_cycle() {
                     for (u8 &i : gfx) {
                         i = 0;
                     }
+
                     drawFlag = true;
                     pc += 2;
                     break;
